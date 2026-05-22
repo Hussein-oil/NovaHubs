@@ -166,6 +166,8 @@
   .sel{background:var(--sel);box-shadow:0 1px 0 var(--accent);}
   .reading{background:var(--read);box-shadow:0 1px 0 var(--accent-2);}
   .story-figure{margin:28px auto;max-width:100%;border:1px solid var(--line);padding:8px;background:var(--paper);box-shadow:4px 4px 0 var(--line),0 6px 18px rgba(0,0,0,.09);}
+  .story-fig-row{display:flex;gap:16px;margin:28px 0;}
+  .story-fig-row .story-figure{margin:0;flex:1 1 0;min-width:0;}
   .story-img{display:block;width:100%;height:auto;border-radius:4px;}
   .endcap{text-align:center;font-family:var(--type);font-size:11px;letter-spacing:3px;color:var(--faint);margin:26px 0 8px;}
   .endcap::before,.endcap::after{content:"———— ";color:var(--line);}
@@ -472,7 +474,7 @@ const STORIES = [
   { id:"a1-1", level:"A1", motif:"door", title:"The Red Door", author:"E. Hartwell",
     blurb:"A quiet man, a small bird, and a door the colour of morning. Sometimes a friend is the smallest thing in the garden.",
     cover:"images/A1/cover.webp",
-    images:["images/A1/1.webp","images/A1/2.webp","images/A1/3.webp","images/A1/4.webp"],
+    images:["images/A1/1.webp",["images/A1/2.webp","images/A1/3.webp"],"images/A1/4.webp"],
     body:[
       "Tom lives in a small town. His house is white. The door is red. Every morning, he opens the red door. He looks at the sky. The sky is blue. A small bird sits on the wall. The bird is brown.",
       "\"Good morning, bird,\" says Tom. The bird looks at him. Then it flies away. Tom walks to the shop. He buys bread and milk. The shop is near the park. In the park, children play. A dog runs after a ball. Tom smiles. He likes the park.",
@@ -819,9 +821,12 @@ function renderReader(asArticle){
       const words=sent.split(/(\s+)/).map(tok=> /^\s+$/.test(tok)?tok:`<span class="w">${esc(tok)}</span>`).join("");
       return `<span class="s" data-si="${si++}" data-text="${esc(sent)}">${words}</span>`;
     }).join(" ");
-    const img=s.images&&s.images[i]?`<figure class="story-figure"><img src="${esc(s.images[i])}" alt="" class="story-img"></figure>`:"";
+    const slot=s.images&&s.images[i];
+    const img=!slot?"":Array.isArray(slot)
+      ?`<div class="story-fig-row">${slot.map(src=>`<figure class="story-figure story-figure-half"><img src="${esc(src)}" alt="" class="story-img"></figure>`).join("")}</div>`
+      :`<figure class="story-figure"><img src="${esc(slot)}" alt="" class="story-img"></figure>`;
     return `<p>${inner}</p>${img}`;
-  }).join("")+(s.images&&s.images[s.body.length]?`<figure class="story-figure"><img src="${esc(s.images[s.body.length])}" alt="" class="story-img"></figure>`:"");
+  }).join("")+(s.images&&s.images[s.body.length]&&!Array.isArray(s.images[s.body.length])?`<figure class="story-figure"><img src="${esc(s.images[s.body.length])}" alt="" class="story-img"></figure>`:"");
 
   const head = isArticle
     ? `<span class="lvl-tag">${esc(s.kicker)} &middot; Journal</span><h1>${esc(s.title)}</h1><div class="by">by ${esc(s.author)}</div>`
